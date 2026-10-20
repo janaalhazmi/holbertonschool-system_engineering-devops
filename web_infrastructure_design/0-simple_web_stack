@@ -1,1 +1,54 @@
+2. Explanation
+
+How the Infrastructure Works
+
+1. A user types www.foobar.com into their browser.
+2. The browser uses DNS to resolve the domain name to the server’s IP address, 8.8.8.8.
+3. The browser sends an HTTP request to the server over the network.
+4. Nginx receives the request and forwards dynamic requests to the application server.
+5. The application server executes the application code and communicates with the MySQL database when data is needed.
+6. The application server generates a response, which Nginx sends back to the user’s browser.
+7. The browser displays the requested website.
+
+What Is a Server?
+
+A server is a computer or system that provides services, resources, or data to other computers called clients. In this infrastructure, the server hosts Nginx, the application server, the application code, and MySQL.
+
+What Is the Role of the Domain Name?
+
+The domain name foobar.com is a human-readable address that allows users to access the website without memorizing its IP address. The www subdomain is configured to point to 8.8.8.8.
+
+What Type of DNS Record Is www?
+
+The www record can be an A record, which maps www.foobar.com to the IPv4 address 8.8.8.8.
+
+What Is the Role of the Web Server?
+
+Nginx is the web server. It receives HTTP requests from users, serves static files such as HTML, CSS, JavaScript, and images, and forwards dynamic requests to the application server.
+
+What Is the Role of the Application Server?
+
+The application server executes the website’s application code, processes user requests, applies business logic, and communicates with the database to retrieve or store information.
+
+What Is the Role of the Database?
+
+MySQL stores and organizes the website’s data. The application server queries the database when it needs to retrieve, update, or save information.
+
+What Is the Server Using to Communicate with the User’s Computer?
+
+The server communicates with the user’s computer over a network using TCP/IP. HTTP is used to exchange web requests and responses, typically over port 80. HTTPS typically uses port 443 and encrypts communication using TLS.
+
+3. Infrastructure Issues
+
+Single Point of Failure (SPOF)
+
+The infrastructure has only one server. If the server fails, the entire website becomes unavailable. The database is also hosted on that server, so a server failure affects both the application and its data access.
+
+Downtime During Maintenance
+
+The website may experience downtime when the server requires maintenance or when new code is deployed. Restarting Nginx or the application server can interrupt service because there is no backup server to handle requests.
+
+Cannot Scale Easily
+
+A single server has limited CPU, memory, and network capacity. If incoming traffic increases significantly, the server may become slow or unavailable. There is no load balancer or additional server to distribute the requests.
 https://mermaid.ai/d/3049a767-3b64-48ff-bd44-f471c5ea9da0
