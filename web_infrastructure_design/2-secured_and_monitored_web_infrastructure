@@ -1,1 +1,127 @@
+2. Infrastructure Explanation
+
+How the Infrastructure Works
+
+1. A user enters www.foobar.com in their browser.
+2. DNS resolves the domain name to the load balancer’s IP address.
+3. The request passes through Firewall 1, which allows legitimate HTTPS traffic.
+4. HAProxy receives the HTTPS request and uses an SSL certificate to establish a secure connection with the browser.
+5. HAProxy distributes requests between the two application servers.
+6. Firewall 2 restricts access to the application servers.
+7. Nginx receives HTTP requests and forwards dynamic requests to the application server.
+8. The application server processes the request and communicates with MySQL through Firewall 3.
+9. The monitoring clients collect logs and metrics from the servers and database and send them to Sumo Logic.
+
+Why Are These Additional Elements Being Added?
+
+1. Three Firewalls
+
+The firewalls protect different parts of the infrastructure:
+
+* Firewall 1: Controls incoming traffic and allows approved HTTPS connections to the load balancer.
+* Firewall 2: Restricts traffic between the load balancer and application servers.
+* Firewall 3: Protects the database by allowing database connections only from authorized application servers.
+
+This separation reduces unauthorized access and limits the impact of a compromised component.
+
+2. SSL Certificate
+
+The SSL/TLS certificate enables HTTPS for www.foobar.com. It helps authenticate the website and establishes encrypted communication between the browser and the HTTPS endpoint.
+
+3. Three Monitoring Clients
+
+Each server has a monitoring client that collects logs and metrics. The clients send this information to a monitoring platform, allowing administrators to identify errors, investigate incidents, and monitor system performance.
+
+⸻
+
+3. What Are Firewalls For?
+
+A firewall filters network traffic according to predefined security rules. It allows authorized connections and blocks unauthorized traffic.
+
+For example, the public-facing firewall can allow HTTPS traffic on port 443 while blocking unnecessary incoming connections. The database firewall should allow connections only from approved application servers.
+
+4. Why Is Traffic Served Over HTTPS?
+
+HTTPS uses TLS to encrypt communication between the browser and the website.
+
+It provides three important benefits:
+
+* Confidentiality: Prevents unauthorized parties from easily reading transmitted data.
+* Integrity: Helps detect unauthorized modifications to data in transit.
+* Authentication: Allows the browser to verify the website’s identity through its certificate.
+
+Without HTTPS, sensitive information transmitted over the network may be exposed to interception or modification.
+
+5. What Is Monitoring Used For?
+
+Monitoring helps administrators understand the health, availability, security, and performance of the infrastructure.
+
+It can be used to:
+
+* Detect server failures and application errors.
+* Monitor CPU, memory, disk usage, and network traffic.
+* Measure response times and request rates.
+* Identify unusual traffic patterns.
+* Detect database problems.
+* Generate alerts when metrics exceed defined thresholds.
+
+6. How Does the Monitoring Tool Collect Data?
+
+Each monitoring client runs on a server and collects relevant information, such as application logs, Nginx access logs, error logs, system metrics, and database metrics.
+
+The clients send this information to a centralized monitoring platform, such as Sumo Logic, over a secure connection. The platform stores and analyzes the data, displays dashboards, and triggers alerts when configured conditions are met.
+
+The exact data collected depends on the installed collectors and their configuration.
+
+7. How Can You Monitor Web Server QPS?
+
+QPS means Queries Per Second. For a web server, it generally refers to the number of requests handled per second.
+
+To monitor it, collect request counts and timestamps from Nginx access logs or another reliable request metric. Configure the monitoring platform to calculate the number of requests over one-second intervals.
+
+For example, if Nginx receives 500 requests in 10 seconds:
+
+QPS = 500 / 10 = 50 requests per second.
+
+A dashboard can display QPS over time, and an alert can notify administrators if the request rate becomes unusually high.
+
+⸻
+
+8. Infrastructure Issues
+
+1. Why Is Terminating SSL at the Load Balancer an Issue?
+
+When SSL/TLS terminates at HAProxy, the connection between the browser and the load balancer is encrypted. However, traffic between HAProxy and the backend servers may be unencrypted unless TLS is configured for those connections as well.
+
+This can expose sensitive data to interception inside the network.
+
+Possible solution: Use TLS between HAProxy and the backend servers, and restrict internal network access through firewall rules.
+
+2. Why Is Having Only One MySQL Server Capable of Accepting Writes an Issue?
+
+If only one MySQL server accepts write operations, it becomes a single point of failure for writes.
+
+If that server fails, the application may be unable to insert, update, or delete data until the server is restored or another server is promoted.
+
+It can also become a performance bottleneck under heavy write traffic.
+
+Possible solution: Configure database replication and a reliable failover process. If multiple writable nodes are required, use an architecture designed to handle multi-primary writes safely, including conflict handling and consistency.
+
+3. Why Can Having All Components on Every Server Be a Problem?
+
+Running the web server, application server, and database on every server can create several problems:
+
+* Resource contention: The database and application compete for CPU, memory, and disk resources.
+* Security risks: Compromising one server may expose multiple components and sensitive database data.
+* Complex maintenance: Updating or restarting one component may affect other services on the same machine.
+* Scaling limitations: Web traffic and database workloads may require different scaling strategies.
+* Operational complexity: Keeping application files, configurations, and database state consistent across servers requires careful management.
+
+Possible solution: Separate application servers from database servers when the workload and security requirements justify it. Scale each layer independently and restrict access between them.
+
+⸻
+
+Submission
+
+File name: 2-secured_and_monitored_web_infrastructure
 https://mermaid.ai/d/3049a767-3b64-48ff-bd44-f471c5ea9da0
