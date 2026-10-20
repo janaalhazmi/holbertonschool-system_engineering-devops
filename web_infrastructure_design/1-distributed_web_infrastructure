@@ -1,1 +1,102 @@
+2. Infrastructure Explanation
+
+How the Infrastructure Works
+
+1. A user enters www.foobar.com in their browser.
+2. DNS resolves the domain name to the IP address of the load balancer.
+3. The browser sends an HTTP request to HAProxy.
+4. HAProxy distributes the request between the two servers using the Round Robin algorithm.
+5. Nginx receives the request and forwards dynamic requests to the application server.
+6. The application server executes the application code and communicates with the MySQL Primary database when data needs to be read or modified.
+7. The Primary database replicates changes to the Replica database.
+8. The server returns the HTTP response through HAProxy to the user’s browser.
+
+Why Are These Additional Elements Being Added?
+
+1. Load Balancer (HAProxy)
+
+HAProxy distributes incoming traffic between the two servers. This improves performance, prevents one server from handling all requests, and allows traffic to continue through the remaining healthy server if one application server becomes unavailable.
+
+2. Second Server
+
+The second server provides redundancy and allows the website to handle more traffic. If one server fails, HAProxy can send requests to the other server, assuming it is healthy.
+
+3. Database Replica
+
+The Replica maintains a copy of the Primary database’s data. It can help with recovery and can serve read queries if the application is configured to use it. Replication is not automatically a complete backup solution.
+
+⸻
+
+3. Load Balancer Algorithm
+
+What Distribution Algorithm Is HAProxy Configured With?
+
+HAProxy is configured with the Round Robin algorithm.
+
+Round Robin distributes requests sequentially between the available servers. For example, the first request goes to Server 1, the second to Server 2, and the third returns to Server 1.
+
+This distributes traffic relatively evenly when requests have similar processing costs. HAProxy can also use health checks to stop sending requests to unhealthy servers.
+
+4. Active-Active vs. Active-Passive
+
+Is the Load Balancer Using Active-Active or Active-Passive?
+
+The two application servers use an Active-Active setup because both servers actively receive and process requests.
+
+* Active-Active: Multiple servers handle traffic simultaneously. This improves resource utilization and allows the system to handle more requests.
+* Active-Passive: One server handles traffic while another remains on standby. The standby server takes over if the active server fails.
+
+Important: The HAProxy instance itself is still a single point of failure unless load-balancer redundancy is also configured.
+
+⸻
+
+5. MySQL Primary-Replica Cluster
+
+How Does a Primary-Replica Database Cluster Work?
+
+A Primary-Replica cluster consists of one Primary database and one or more Replica databases.
+
+* Primary: Handles database writes, such as inserting, updating, or deleting records.
+* Replica: Receives replicated changes from the Primary and maintains a copy of its data.
+* Replication: MySQL transfers changes from the Primary to the Replica. Depending on the configuration, replication may be asynchronous, meaning the Replica can temporarily lag behind the Primary.
+
+What Is the Difference Between the Primary and Replica Nodes?
+
+The application sends write operations to the Primary database to maintain a consistent source of updates.
+
+The application may send read-only queries to the Replica to reduce the workload on the Primary. However, because replication can be delayed, the Replica might not immediately contain the latest changes.
+
+If the Primary fails, the Replica does not necessarily become the Primary automatically. A failover process is required, and it must be configured and managed.
+
+⸻
+
+6. Infrastructure Issues
+
+1. Single Points of Failure (SPOF)
+
+Several components can still cause outages:
+
+* HAProxy: If the only load balancer fails, users may be unable to reach either server.
+* Primary Database: If the Primary fails, write operations may stop until recovery or failover occurs.
+* Network or DNS: Network failures or DNS misconfiguration can prevent users from reaching the website.
+
+The two application servers reduce the risk of a single application-server failure, but they do not eliminate every SPOF.
+
+2. Security Issues: No Firewall and No HTTPS
+
+Without a firewall, the servers may be exposed to unauthorized connections and attacks.
+
+Without HTTPS, communication between the browser and the website is not encrypted, exposing transmitted data to interception or modification.
+
+To improve security, the infrastructure should use firewalls, HTTPS with TLS certificates, restricted database access, and secure application configuration.
+
+3. No Monitoring
+
+Without monitoring, the team may not notice server failures, high resource usage, slow responses, or database replication delays.
+
+Monitoring tools and alerts should be configured to track server health, response times, resource utilization, and database status.
+
+⸻
+
+File name: 1-distributed_web_infrastructure
 https://mermaid.ai/d/3049a767-3b64-48ff-bd44-f471c5ea9da0
