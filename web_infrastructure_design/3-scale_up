@@ -64,4 +64,4 @@ This scaled-up infrastructure separates the web server, application server, and 
 The second HAProxy instance adds redundancy to the load-balancing layer. With a correctly configured failover mechanism, the infrastructure can continue accepting requests if the primary load balancer fails.
 
 File name: 3-scale_up
-https://mermaid.ai/d/3049a767-3b64-48ff-bd44-f471c5ea9da0
+https://mermaid.ai/d/60888675-0977-42b1-99ff-61c125ea74cf
