@@ -1,1 +1,67 @@
+2. Infrastructure Explanation
+
+How the Infrastructure Works
+
+1. A user enters www.foobar.com in their browser.
+2. DNS resolves the domain name to the load balancer’s public or virtual IP address.
+3. HAProxy receives the incoming request and forwards it to the web server.
+4. Nginx receives the HTTP request and serves static files or forwards dynamic requests to the application server.
+5. The application server executes the application code and communicates with MySQL when data is required.
+6. The database returns the requested data to the application server.
+7. The application generates a response, and Nginx sends it back to the user’s browser.
+8. If the active HAProxy server fails, the standby HAProxy server takes over, provided failover has been configured correctly.
+
+3. Why Are We Adding These Elements?
+
+1. An Additional Server
+
+The additional server allows the web, application, and database components to run independently instead of sharing the same machine.
+
+This improves resource management and allows each component to be maintained and scaled according to its workload.
+
+2. A Second Load Balancer
+
+The second HAProxy instance provides redundancy for the load-balancing layer.
+
+If the primary load balancer fails, the standby instance can take over. This reduces the risk of the load balancer becoming a single point of failure.
+
+However, the two instances must be configured with a working failover mechanism, such as Keepalived with a virtual IP address.
+
+3. A Dedicated Web Server
+
+The web server runs Nginx and handles incoming HTTP requests. It serves static content and forwards dynamic requests to the application server.
+
+Separating Nginx from the application server allows web traffic and application processing to use separate resources.
+
+4. A Dedicated Application Server
+
+The application server runs the website’s application code and handles business logic.
+
+Separating it from Nginx makes it easier to maintain the application, allocate resources, and scale application processing independently.
+
+5. A Dedicated Database Server
+
+The database server runs MySQL and stores the website’s data.
+
+Separating the database from the web and application servers improves resource isolation, simplifies database administration, and allows database-specific security controls.
+
+⸻
+
+4. Application Server vs. Web Server
+
+A web server, such as Nginx, handles HTTP requests and serves static files such as HTML, CSS, JavaScript, and images. It can also forward dynamic requests to an application server.
+
+An application server executes the application’s code, processes business logic, and interacts with the database to retrieve or update information.
+
+For example, when a user opens a page containing static HTML, Nginx may serve it directly. When the user submits a login form, Nginx forwards the request to the application server, which validates the credentials and queries the database if necessary.
+
+⸻
+
+5. Conclusion
+
+This scaled-up infrastructure separates the web server, application server, and database onto dedicated machines. This improves resource isolation and makes each component easier to manage and scale independently.
+
+The second HAProxy instance adds redundancy to the load-balancing layer. With a correctly configured failover mechanism, the infrastructure can continue accepting requests if the primary load balancer fails.
+
+File name: 3-scale_up
 https://mermaid.ai/d/3049a767-3b64-48ff-bd44-f471c5ea9da0
